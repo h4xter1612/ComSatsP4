@@ -4,6 +4,10 @@
 
 **Coauthors:** Eduardo Franco Ortega, Elrick Eduardo Haces Gil Sotelo
 
+## Required libraries
+
+https://github.com/nRF24/RF24.git
+
 ## Overview
 
 **ComSatsP4** - Embedded Communication System
