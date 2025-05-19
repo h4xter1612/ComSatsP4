@@ -339,13 +339,7 @@ a.out
 .vs/
 {yourgitprojectname}/.vs
 
-# Ignora archivos binarios sin extensión en la raíz
-/*
-
-# ¡Pero no ignores subcarpetas y su contenido!
-!*/
-
-# Incluye archivos fuente en cualquier subcarpeta
-!**/*.cpp
-!**/*.h
+# Ignorar ejecutables sin extensión (no tienen punto en el nombre)
+**/*
+!**/*.*  # ¡excepto los archivos que sí tienen extensión, como .cpp, .h, etc.!
 
