@@ -8,6 +8,10 @@
 
 https://github.com/nRF24/RF24.git
 
+## Compilation code 
+
+`g++ code_name.cpp -o code_name -I/usr/local/include/RF24 -lrf24` 
+
 ## Overview
 
 **ComSatsP4** - Embedded Communication System
