@@ -1,6 +1,6 @@
 #include <iostream>
 //#include <RF24/nRF24L01.h>
-#include <RF24/RF24.h> // SPI и работа с GPIO (BCM нумерация) реализована уже в библиотеке
+#include <RF24.h> // SPI и работа с GPIO (BCM нумерация) реализована уже в библиотеке
 
 using namespace std;
 
@@ -14,7 +14,7 @@ int main() {
   // канал передачи данных (от 0 до 125), 5 - на частоте 2,405 ГГц
   radio.setChannel(5);
   // уровень усиления передатчика (RF24_PA_MIN=-18dBm, RF24_PA_LOW=-12dBm, RF24_PA_HIGH=-6dBm, RF24_PA_MAX=0dBm)
-  radio.setPALevel(RF24_PA_HIGH);
+  radio.setPALevel(RF24_PA_LOW);
   // скорость передачи данных (RF24_250KBPS, RF24_1MBPS, RF24_2MBPS), RF24_1MBPS - 1Мбит/сек
   radio.setDataRate(RF24_1MBPS);
   // разрешаем получение пакета подтверждения приема данных (по умолчанию true)
@@ -30,6 +30,8 @@ int main() {
 
   // открываем трубу с уникальным ID (одновременно может быть открыта только одна труба для передачи данных)
   radio.openWritingPipe(0x7878787878LL);
+
+  radio.printDetails();
 
   // блок полезных данных может быть до 32 байт
   char text[] = "Hello world!";
@@ -57,7 +59,7 @@ int main() {
       for (uint8_t i = 0; i < sizeof(ackData); i++) {
         FIFO += ackData[i];
       }
-      Serial.println(FIFO);
+//      Serial.println(FIFO);
 
       // Если все три буфера FIFO заполнены то очищаем
       if (radio.rxFifoFull()) {

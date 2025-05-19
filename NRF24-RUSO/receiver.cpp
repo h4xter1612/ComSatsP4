@@ -17,9 +17,10 @@ int main() {
   // канал передачи данных (от 0 до 125), 5 - на частоте 2,405 ГГц
   radio.setChannel(5);
   // уровень усиления сигнала (RF24_PA_MIN=-18dBm, RF24_PA_LOW=-12dBm, RF24_PA_HIGH=-6dBm, RF24_PA_MAX=0dBm)
-  radio.setPALevel(RF24_PA_HIGH);
+  radio.setPALevel(RF24_PA_LOW);
   // скорость передачи данных (RF24_250KBPS, RF24_1MBPS, RF24_2MBPS), RF24_1MBPS - 1Мбит/сек
   radio.setDataRate(RF24_1MBPS);
+
   // открываем трубу с адресом 0x7878787878LL для приема данных (всего может быть труб 0 - 5)
   radio.openReadingPipe(0, 0x7878787878LL);
 

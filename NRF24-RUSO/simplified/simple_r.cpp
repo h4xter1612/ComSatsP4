@@ -1,6 +1,6 @@
 #include <iostream>
 //#include "../RF24/nRF24L01.h"
-#include "../RF24/RF24.h"
+#include <RF24.h>
 
 using namespace std;
 
@@ -16,8 +16,8 @@ int main() {
 
   radio.begin();
   radio.setChannel(5);
-  radio.setPALevel(RF24_PA_HIGH);
-  radio.setDataRate(RF24_1MBPS);
+  radio.setPALevel(RF24_PA_LOW);
+  radio.setDataRate(RF24_250KBPS);
   radio.enableDynamicPayloads();
 
   radio.openReadingPipe(0, 0x7878787878LL);

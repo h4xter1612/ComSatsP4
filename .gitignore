@@ -338,3 +338,9 @@ a.out
 *build*
 .vs/
 {yourgitprojectname}/.vs
+
+# Ignora todos los archivos sin extensión
+*
+# Pero no ignores archivos fuente
+!*.cpp
+!*.h
