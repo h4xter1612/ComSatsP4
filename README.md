@@ -1,8 +1,9 @@
 # ComSatsP4
 
-**Author:** Juan Pablo Solís Ruiz | **Date:** 4/26/2025
+**Authors:** Juan Pablo Solís Ruiz, Eduardo Franco Ortega, Elrick Eduardo Haces Gil Sotelo
+| **Date:** 4/26/2025
 
-**Coauthors:** Eduardo Franco Ortega, Elrick Eduardo Haces Gil Sotelo
+<!--**Coauthors:** Eduardo Franco Ortega, Elrick Eduardo Haces Gil Sotelo-->
 
 ## Required libraries
 
