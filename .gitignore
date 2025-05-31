@@ -339,11 +339,3 @@ a.out
 .vs/
 {yourgitprojectname}/.vs
 
-# Ignorar archivos sin punto
-*[^.]*
-
-# Pero NO ignorar carpetas
-!*/
-
-# No ignorar archivos con extensión
-!*.*
