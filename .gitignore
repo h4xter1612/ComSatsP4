@@ -339,7 +339,8 @@ a.out
 .vs/
 {yourgitprojectname}/.vs
 
-# Ignorar ejecutables sin extensión (no tienen punto en el nombre)
-**/*
-!**/*.*  # ¡excepto los archivos que sí tienen extensión, como .cpp, .h, etc.!
+# Ignorar todos los archivos sin extensión (no contienen punto)
+**/[^.]*
 
+# Pero NO ignores carpetas ni archivos con extensión
+!**/*.* 
