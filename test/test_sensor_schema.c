@@ -1,7 +1,10 @@
 #include <stdio.h>
+#include <string.h>
+#include <sqlite3.h>
+
 #include "sensor_schema.h"
 #include "sensor_schema_utils.h"
-#include <string.h>
+
 int main(void) {
     // Simulated sensor values
     float temperature = 0.0f;
@@ -28,39 +31,51 @@ int main(void) {
         return -1;
     }
 
-    // Simulate updates (this would come from hardware in real case)
-    	//*((float*)sensors[0].data_ptr) = 23.7f;
-    	//*((int32_t*)sensors[1].data_ptr) = 1020;
-    	//snprintf((char*)sensors[2].data_ptr, MAX_SENSOR_NAME_LEN, "OK");
-    //Update sensor value
+    // Open SQLite database
+    sqlite3* db;
+    if (sqlite3_open("telemetry.db", &db) != SQLITE_OK) {
+        fprintf(stderr, "Cannot open database: %s\n", sqlite3_errmsg(db));
+        return -1;
+    }
 
+    // Create table based on schema
+    if (create_sql_table_from_squema(db, &schema) != 0) {
+        fprintf(stderr, "Failed to create table.\n");
+        sqlite3_close(db);
+        return -1;
+    }
+
+    // Simulate updates
     float up_temp = 24.0f;
     int up_pres = 2;
     char up_statos[32] = "OK";
-    sensor_data_value_update(&sensors[0] ,  &up_temp);
-    sensor_data_value_update(&sensors[1] ,  &up_pres);
-    sensor_data_value_update(&sensors[2] ,  &up_statos);
+
+    sensor_data_value_update(&sensors[0], &up_temp);
+    sensor_data_value_update(&sensors[1], &up_pres);
+    sensor_data_value_update(&sensors[2], &up_statos);
+
     // Print results
     printf("Sensor Values:\n");
     printf(" - Temperature: %.2f\n", temperature);
     printf(" - Pressure: %d\n", pressure);
     printf(" - Status: %s\n", status_text);
-   
+
     up_temp = 26.0f;
     up_pres = 5;
     strcpy(up_statos, "ERROR");
-    
-    sensor_data_value_update(&sensors[0] ,  &up_temp);
-    sensor_data_value_update(&sensors[1] ,  &up_pres);
-    sensor_data_value_update(&sensors[2] ,  &up_statos);
-    // Print results
-    printf("Sensor Values:\n");
+
+    sensor_data_value_update(&sensors[0], &up_temp);
+    sensor_data_value_update(&sensors[1], &up_pres);
+    sensor_data_value_update(&sensors[2], &up_statos);
+
+    printf("Sensor Values (updated):\n");
     printf(" - Temperature: %.2f\n", temperature);
     printf(" - Pressure: %d\n", pressure);
     printf(" - Status: %s\n", status_text);
 
-   
-    return 0;
+    // Close database
+    sqlite3_close(db);
 
+    return 0;
 }
 

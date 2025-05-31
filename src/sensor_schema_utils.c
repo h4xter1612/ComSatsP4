@@ -1,6 +1,8 @@
+#include <stdio.h>
 #include <string.h>
 #include <sensor_schema_utils.h>
-
+#include <stdlib.h>
+#include <sqlite3.h>
 // Inicializa un sensor individual
 int sensor_def_init(SensorDef* f,
                     uint8_t id,
@@ -81,6 +83,51 @@ int sensor_data_value_update(SensorDef* sensor, void* value){
 
 	return 0;
 }
+
+//Create table from squema
+int create_sql_table_from_squema(sqlite3* db,const TableSensorsSchema* schema){
+	if (!db || !schema->fields || schema->field_count == 0)
+		return -1;
+	
+	//Sql stmnt
+	char sql[1024] = {0}; //Quzias memoria dinamica mejor
+	//Create table from squema
+	snprintf(sql, sizeof(sql), "CREATE TABLE IF NOT EXISTS %s (id INTEGER PRIMARY KEY AUTOINCREMENT,", schema->table_name);
+
+    // Append each sensor
+    for (size_t i = 0; i < schema->field_count; ++i) {
+        const SensorDef* s = &schema->fields[i];
+        const char* sql_type = NULL;
+
+        switch (s->type) {
+            case SENSOR_REAL: sql_type = "REAL"; break;
+            case SENSOR_INTEGER: sql_type = "INTEGER"; break;
+            case SENSOR_TEXT: sql_type = "TEXT"; break;
+            default: return -2;
+        }
+
+        // Ensure it fits (append with comma)
+        char field_def[128];
+        snprintf(field_def, sizeof(field_def), "%s %s%s",
+                 s->sensor_name,
+                 sql_type,
+                 (i < schema->field_count - 1) ? "," : ")");
+
+        strncat(sql, field_def, sizeof(sql) - strlen(sql) - 1);
+    }
+
+    // Execute the SQL
+    char* err_msg = NULL;
+    if (sqlite3_exec(db, sql, 0, 0, &err_msg) != SQLITE_OK) {
+        fprintf(stderr, "SQLite error: %s\n", err_msg);
+        sqlite3_free(err_msg);
+        return -3;
+    }
+
+    printf("Table '%s' created successfully.\n", schema->table_name);
+    return 0;
+}
+ 
 
 
 

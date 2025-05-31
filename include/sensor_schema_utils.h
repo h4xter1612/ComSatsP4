@@ -2,6 +2,7 @@
 #define SENSOR_SCHEMA_UTILS_H
 
 #include "sensor_schema.h"
+#include <sqlite3.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -27,7 +28,11 @@ int sensor_schema_validate(const TableSensorsSchema* schema);
 
 
 int sensor_data_value_update(SensorDef* sensor, void* value);
-	
+
+//Create table from squema
+int create_sql_table_from_squema(sqlite3* db,const TableSensorsSchema* schema); 
+
+    
 
 #ifdef __cplusplus
 }
