@@ -23,6 +23,12 @@ int table_schema_init(TableSensorsSchema* schema,
 // Check for duplicate sensor IDs or names
 int sensor_schema_validate(const TableSensorsSchema* schema);
 
+//Update data value sensor
+
+
+int sensor_data_value_update(SensorDef* sensor, void* value);
+	
+
 #ifdef __cplusplus
 }
 #endif

@@ -56,3 +56,44 @@ int sensor_schema_validate(const TableSensorsSchema* schema) {
 
 }
 
+//Update sensor value
+
+int sensor_data_value_update(SensorDef* sensor, void* value){
+	if (!sensor || !sensor->data_ptr || !value){
+		return -1;
+	}
+	
+	switch(sensor->type){
+		case SENSOR_INTEGER:
+			*(int*)(sensor->data_ptr) = *(int*)value;
+			break;
+		case SENSOR_REAL:
+			*(float*)(sensor->data_ptr) = *(float*)value;
+			break;
+		case SENSOR_TEXT:
+            		strncpy((char*)(sensor->data_ptr), (const char*)value, MAX_SENSOR_NAME_LEN - 1);
+            		((char*)sensor->data_ptr)[MAX_SENSOR_NAME_LEN - 1] = '\0'; // Null-terminate
+            		break;
+		default:
+			return -2;
+
+	}
+
+	return 0;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

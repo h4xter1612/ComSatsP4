@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include "sensor_schema.h"
 #include "sensor_schema_utils.h"
-
+#include <string.h>
 int main(void) {
     // Simulated sensor values
     float temperature = 0.0f;
@@ -29,16 +29,37 @@ int main(void) {
     }
 
     // Simulate updates (this would come from hardware in real case)
-    *((float*)sensors[0].data_ptr) = 23.7f;
-    *((int32_t*)sensors[1].data_ptr) = 1020;
-    snprintf((char*)sensors[2].data_ptr, MAX_SENSOR_NAME_LEN, "OK");
+    	//*((float*)sensors[0].data_ptr) = 23.7f;
+    	//*((int32_t*)sensors[1].data_ptr) = 1020;
+    	//snprintf((char*)sensors[2].data_ptr, MAX_SENSOR_NAME_LEN, "OK");
+    //Update sensor value
 
+    float up_temp = 24.0f;
+    int up_pres = 2;
+    char up_statos[32] = "OK";
+    sensor_data_value_update(&sensors[0] ,  &up_temp);
+    sensor_data_value_update(&sensors[1] ,  &up_pres);
+    sensor_data_value_update(&sensors[2] ,  &up_statos);
+    // Print results
+    printf("Sensor Values:\n");
+    printf(" - Temperature: %.2f\n", temperature);
+    printf(" - Pressure: %d\n", pressure);
+    printf(" - Status: %s\n", status_text);
+   
+    up_temp = 26.0f;
+    up_pres = 5;
+    strcpy(up_statos, "ERROR");
+    
+    sensor_data_value_update(&sensors[0] ,  &up_temp);
+    sensor_data_value_update(&sensors[1] ,  &up_pres);
+    sensor_data_value_update(&sensors[2] ,  &up_statos);
     // Print results
     printf("Sensor Values:\n");
     printf(" - Temperature: %.2f\n", temperature);
     printf(" - Pressure: %d\n", pressure);
     printf(" - Status: %s\n", status_text);
 
+   
     return 0;
 
 }
