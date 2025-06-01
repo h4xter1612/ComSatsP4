@@ -63,7 +63,9 @@ int main(void) {
     strftime(new_time, sizeof(new_time), "%Y-%m-%d %H:%M:%S", localtime(&now));
 
     sensor_data_value_update(&sensors[3], &new_time);
- 
+    if (update_sql_db_from_schema(db, &schema) != 0) {
+    fprintf(stderr, "Failed to upsert sensor data.\n");
+	} 
     // Print results
     printf("Sensor Values:\n");
     printf(" - Temperature: %.2f\n", temperature);
@@ -78,7 +80,9 @@ int main(void) {
     sensor_data_value_update(&sensors[1], &up_pres);
     sensor_data_value_update(&sensors[2], &up_statos);
     sensor_data_value_update(&sensors[3], &new_time);
-
+    if (update_sql_db_from_schema(db, &schema) != 0) {
+    fprintf(stderr, "Failed to upsert sensor data.\n");
+	}
     printf("Sensor Values (updated):\n");
     printf(" - Temperature: %.2f\n", temperature);
     printf(" - Pressure: %d\n", pressure);
@@ -89,4 +93,4 @@ int main(void) {
 
     return 0;
 }
-
+	
