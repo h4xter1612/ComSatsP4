@@ -138,10 +138,93 @@ int create_sql_table_from_squema(sqlite3* db,const TableSensorsSchema* schema){
 
 } 
 
+//Update Sqlite from table
 
+int update_sql_db_from_schema(sqlite3 *db, const TableSensorsSchema* schema) {
+    if (!db || !schema || !schema->fields || schema->field_count == 0 || schema->conflict_field_id >= schema->field_count)
+        return -1;
 
+    char sql[2048] = {0};
+    char cols[1024] = {0};
+    char vals[1024] = {0};
+    char updates[1024] = {0};
 
+    const char* conflict_col = schema->fields[schema->conflict_field_id].sensor_name;
 
+    // Construye las columnas y los signos de ?
+    for (size_t i = 0; i < schema->field_count; ++i) {
+        strncat(cols, schema->fields[i].sensor_name, sizeof(cols) - strlen(cols) - 1);
+        strncat(vals, "?", sizeof(vals) - strlen(vals) - 1);
+
+        if (i < schema->field_count - 1) {
+            strncat(cols, ", ", sizeof(cols) - strlen(cols) - 1);
+            strncat(vals, ", ", sizeof(vals) - strlen(vals) - 1);
+        }
+    }
+
+    // Construye la parte de UPDATE sin incluir el campo de conflicto
+    int first = 1;
+    for (size_t i = 0; i < schema->field_count; ++i) {
+        if (i == schema->conflict_field_id) continue;
+
+        const char* name = schema->fields[i].sensor_name;
+        char update_expr[128] = {0};
+
+        if (!first)
+            strncat(updates, ", ", sizeof(updates) - strlen(updates) - 1);
+        snprintf(update_expr, sizeof(update_expr), "%s = excluded.%s", name, name);
+        strncat(updates, update_expr, sizeof(updates) - strlen(updates) - 1);
+
+        first = 0;
+    }
+
+    // Arma el SQL final
+    snprintf(sql, sizeof(sql),
+             "INSERT INTO \"%s\" (%s) VALUES (%s) "
+             "ON CONFLICT(%s) DO UPDATE SET %s",
+             schema->table_name, cols, vals, conflict_col, updates);
+
+    printf("UPSERT SQL: %s\n", sql);
+
+    // Prepara el statement
+    sqlite3_stmt* stmt;
+    if (sqlite3_prepare_v2(db, sql, -1, &stmt, NULL) != SQLITE_OK) {
+        fprintf(stderr, "sqlite3_prepare_v2 failed: %s\n", sqlite3_errmsg(db));
+        return -2;
+    }
+
+    // Bindea los valores actuales del sensor
+    for (size_t i = 0; i < schema->field_count; ++i) {
+        const SensorDef* s = &schema->fields[i];
+
+        switch (s->type) {
+            case SENSOR_REAL:
+                sqlite3_bind_double(stmt, i + 1, *(float*)(s->data_ptr));
+                break;
+            case SENSOR_INTEGER:
+                sqlite3_bind_int(stmt, i + 1, *(int*)(s->data_ptr));
+                break;
+            case SENSOR_TEXT:
+                sqlite3_bind_text(stmt, i + 1, (const char*)(s->data_ptr), -1, SQLITE_STATIC);
+                break;
+            default:
+                fprintf(stderr, "Unsupported sensor type\n");
+                sqlite3_finalize(stmt);
+                return -3;
+        }
+    }
+
+    // Ejecuta el statement
+    int rc = sqlite3_step(stmt);
+    if (rc != SQLITE_DONE) {
+        fprintf(stderr, "sqlite3_step failed: %s\n", sqlite3_errmsg(db));
+        sqlite3_finalize(stmt);
+        return -4;
+    }
+
+    sqlite3_finalize(stmt);
+    return 0;
+}
 
 
 

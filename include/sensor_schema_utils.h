@@ -34,7 +34,7 @@ int sensor_data_value_update(SensorDef* sensor, void* value);
 int create_sql_table_from_squema(sqlite3* db,const TableSensorsSchema* schema);
 //Update sqlite table
 
-int update_sql_db_from_schema(sqlite3 *, const TableSensorsSchema* schema);
+int update_sql_db_from_schema(sqlite3 *db, const TableSensorsSchema* schema);
     
 
 #ifdef __cplusplus
