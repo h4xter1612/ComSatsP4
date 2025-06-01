@@ -26,14 +26,15 @@ int sensor_def_init(SensorDef* f,
 // Inicializa la estructura de tabla
 int table_schema_init(TableSensorsSchema* schema,
                       const char* table_name,
+		      uint8_t conflict_field_id,
                       SensorDef* fields,
                       size_t count) {
-    if (!schema || !table_name || !fields || count == 0 || strlen(table_name) >= MAX_TABLE_NAME_LEN)
+    if (!schema || !table_name || !fields || count == 0 || strlen(table_name) >= MAX_TABLE_NAME_LEN || conflict_field_id >= count)
         return -1;
 
     strncpy(schema->table_name, table_name, MAX_TABLE_NAME_LEN - 1);
     schema->table_name[MAX_TABLE_NAME_LEN - 1] = '\0';
-
+    schema->conflict_field_id = conflict_field_id;
     schema->fields = fields;  // corregido nombre del campo
     schema->field_count = count;
     return 0;
@@ -86,37 +87,45 @@ int sensor_data_value_update(SensorDef* sensor, void* value){
 
 //Create table from squema
 int create_sql_table_from_squema(sqlite3* db,const TableSensorsSchema* schema){
-	if (!db || !schema->fields || schema->field_count == 0)
+	if (!db || !schema->fields || schema->field_count == 0 || schema->conflict_field_id >= schema->field_count )
 		return -1;
-	
+		
 	//Sql stmnt
 	char sql[1024] = {0}; //Quzias memoria dinamica mejor
 	//Create table from squema
 	snprintf(sql, sizeof(sql), "CREATE TABLE IF NOT EXISTS %s (id INTEGER PRIMARY KEY AUTOINCREMENT,", schema->table_name);
-
     // Append each sensor
+    
     for (size_t i = 0; i < schema->field_count; ++i) {
-        const SensorDef* s = &schema->fields[i];
+        
+	const SensorDef* s = &schema->fields[i];
         const char* sql_type = NULL;
-
+	
         switch (s->type) {
             case SENSOR_REAL: sql_type = "REAL"; break;
             case SENSOR_INTEGER: sql_type = "INTEGER"; break;
             case SENSOR_TEXT: sql_type = "TEXT"; break;
             default: return -2;
         }
-
-        // Ensure it fits (append with comma)
-        char field_def[128];
-        snprintf(field_def, sizeof(field_def), "%s %s%s",
-                 s->sensor_name,
-                 sql_type,
-                 (i < schema->field_count - 1) ? "," : ")");
-
-        strncat(sql, field_def, sizeof(sql) - strlen(sql) - 1);
-    }
-
+	//Conflict to upsert
+        if (i==schema->conflict_field_id){
+		char conflict_field_def[128];
+		snprintf(conflict_field_def,sizeof(conflict_field_def),"%s %s NOT NULL UNIQUE%s",
+		s->sensor_name, sql_type, (i < schema-> field_count - 1)? ",":")");
+		strncat(sql,conflict_field_def, sizeof(sql) - strlen(sql) -1);
+	}			
+	// Ensure it fits (append with comma)
+	else{
+    		char field_def[128];
+        	snprintf(field_def, sizeof(field_def), "%s %s%s",
+                s->sensor_name,
+                sql_type,
+                (i < schema->field_count - 1) ? "," : ")");
+        	strncat(sql, field_def, sizeof(sql) - strlen(sql) - 1);
+	}
+     }
     // Execute the SQL
+    printf("Generated SQL: %s\n", sql);
     char* err_msg = NULL;
     if (sqlite3_exec(db, sql, 0, 0, &err_msg) != SQLITE_OK) {
         fprintf(stderr, "SQLite error: %s\n", err_msg);
@@ -126,8 +135,8 @@ int create_sql_table_from_squema(sqlite3* db,const TableSensorsSchema* schema){
 
     printf("Table '%s' created successfully.\n", schema->table_name);
     return 0;
-}
- 
+
+} 
 
 
 

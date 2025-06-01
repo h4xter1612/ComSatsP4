@@ -35,6 +35,7 @@ typedef struct{
 typedef struct{
 
 	char table_name[MAX_TABLE_NAME_LEN];
+	uint8_t conflict_field_id;
 	SensorDef* fields;
 	size_t field_count;
 
